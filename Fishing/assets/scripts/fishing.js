@@ -13,7 +13,7 @@ var fishDB = [
         "Description":"Testing Fish",
         "Catch Requirement":4,
         "Catch Timer": 12,
-        "Image":"assets/Raw_Salmon_JE2_BE2.png"
+        "Image":"assets/images/Raw_Salmon_JE2_BE2.png"
     }
 ]
 
@@ -50,10 +50,13 @@ var baitPools = {
 var currentBait = "nobait"
 var currentFishId = 0;
 
-function print(message) {
-    console.log(message)
-    $("#debug").html(message + "<hr>"+$("#debug").html())
-    $("#debug").show()
+var reelingAudio
+
+function playSound(url, loop = false) {
+    const audio = new Audio(url);
+    audio.loop = loop
+    audio.play();
+    return audio
 }
 
 function startCatchingFish() {
@@ -77,18 +80,57 @@ function startCatchingFish() {
         catchTime += 0.01
         if (catchTime >= fishDB[currentFishId]["Catch Timer"]) stopCatchingFish(false)
     }, 10)
+    if (reelingAudio === undefined) {
+        reelingAudio = playSound("assets/sounds/reeling.mp3",true)
+    }
+    reelingAudio.currentTime = 0;
+    reelingAudio.play()
     moveFishMarker()
 }
 function stopCatchingFish(won) {
-    if (!won) alert("failed")
+    if (won) {
+        playSound("assets/sounds/victory.mp3")
+    } else {
+        playSound("assets/sounds/fail.mp3")
+    }
+    reelingAudio.pause()
     $("#fishing-minigame").hide()
     fishing = false
     clearInterval(fishingInterval)
 }
+var fishCatchChance = 10
+var fishCatchChanceMult = 3
+var searching = false
+function startFishSearching() {
+    if (searching) return;
+    $("#catch").hide()
+    playSound("assets/sounds/start.mp3")
+    var loops = 0
+    searching = true
+    var interval = setInterval(() => {
+        if (fishing) {
+            clearInterval(interval)
+            searching = false
+            return
+        }
+        loops += 1;
+        var chance = Math.random()*100
+        var req = fishCatchChance + fishCatchChanceMult * loops
+        if (chance < req) {
+            startCatchingFish()
+            clearInterval(interval)
+            searching = false
+            console.log("Started catching fish with chance: "+req)
+        } else {
+            console.log("Failed to find fish with chance: "+req)
+        }
+
+    },2500)
+}
 function succeedCatchingFish() {
-    alert("caught fish "+fishDB[currentFishId].Name)
     $("#catch").show()
     $("#catch .fish").attr("src",fishDB[currentFishId].Image)
+    $("#catch p").text("caught fish: "+fishDB[currentFishId].Name+"!")
     stopCatchingFish(true)
 }
 function moveFishMarker() {
@@ -118,14 +160,14 @@ function checkBait() {
         for (var i in poolData) {
             total += poolData[i].rarity
             if (poolData[i].fish.length == 0) {
-                print("no fish in bait pool " + bait + " at index " + i)
+                console.log("no fish in bait pool " + bait + " at index " + i)
             }
             for (var y in poolData[i].fish) {
-                if (fishNames.indexOf(poolData[i].fish[y]) == -1) print("incorrect fish for "+bait+" at index "+i+" for fish "+poolData[i].fish[y]+" (index"+y+")")
+                if (fishNames.indexOf(poolData[i].fish[y]) == -1) console.log("incorrect fish for "+bait+" at index "+i+" for fish "+poolData[i].fish[y]+" (index"+y+")")
             }
         }
         if (total != 100) {
-            print("incorrect rarity total for "+bait+ ": "+total+" (100 expected)")
+            console.log("incorrect rarity total for "+bait+ ": "+total+" (100 expected)")
         }
     }
 }
@@ -142,7 +184,7 @@ $(document).ready(function(){
     setInterval(() => {
         r += 0.01
         $(".rays").css("transform","rotate("+(r * 15)+"deg)")
-        //print(r)
+        //console.log(r)
     },10)
 
     $(document).on("keypress",(event) => {
@@ -154,11 +196,14 @@ $(document).ready(function(){
                 if (catchProgress < -3) stopCatchingFish(false)
                 if (catchProgress >= fishDB[currentFishId]["Catch Requirement"]) succeedCatchingFish()
             } else {
+                
+                startFishSearching()
 
             }
         }
         if (event.code == "KeyR") {
             if (!fishing) {
+                playSound("assets/sounds/start.mp3")
                 startCatchingFish()
             }
         }

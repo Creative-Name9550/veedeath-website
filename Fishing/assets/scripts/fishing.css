@@ -62,6 +62,18 @@ body {
     top:20%;
     left: 20%;
 }
+#catch p {
+    position:absolute;
+    font-size: 3em;
+    color:rgb(255, 255, 255);
+    -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: black;
+    font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    width:100%;
+    text-align: center;
+    top: calc(100% - 3em);
+}
 
 #debug {
     position:absolute;
