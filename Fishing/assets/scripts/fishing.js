@@ -200,12 +200,6 @@ $(document).ready(function(){
                 startFishSearching()
 
             }
-        }
-        if (event.code == "KeyR") {
-            if (!fishing) {
-                playSound("assets/sounds/start.mp3")
-                startCatchingFish()
-            }
-        }
+        }\
     })
 })
