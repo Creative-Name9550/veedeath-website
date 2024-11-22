@@ -200,6 +200,6 @@ $(document).ready(function(){
                 startFishSearching()
 
             }
-        }\
+        }
     })
 })
