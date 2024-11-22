@@ -187,19 +187,23 @@ $(document).ready(function(){
         //console.log(r)
     },10)
 
+    function fish() {
+        if (fishing) {
+            var hitCount = checkHit()
+            catchProgress += hitCount
+            if (hitCount > -1) moveFishMarker()
+            if (catchProgress < -3) stopCatchingFish(false)
+            if (catchProgress >= fishDB[currentFishId]["Catch Requirement"]) succeedCatchingFish()
+        } else {
+            
+            startFishSearching()
+
+        }
+    }
     $(document).on("keypress",(event) => {
         if (event.code == "Space") {
-            if (fishing) {
-                var hitCount = checkHit()
-                catchProgress += hitCount
-                if (hitCount > -1) moveFishMarker()
-                if (catchProgress < -3) stopCatchingFish(false)
-                if (catchProgress >= fishDB[currentFishId]["Catch Requirement"]) succeedCatchingFish()
-            } else {
-                
-                startFishSearching()
-
-            }
+            fish()
         }
     })
+    $(document).on("click",fish)
 })
