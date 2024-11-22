@@ -205,5 +205,7 @@ $(document).ready(function(){
             fish()
         }
     })
-    $(document).on("click",fish)
+    $("#fishing-area").click((event) => {
+        fish()
+    })
 })
